@@ -2,4 +2,4 @@ bin/
 run.sh
 run.bat
 *.lnk
-
+temp/

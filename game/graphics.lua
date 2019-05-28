@@ -154,6 +154,8 @@ function graphics_init()
 		end
 	end
 
+	IMG_vanity_sign = love.graphics.newImage("assets/plus.png")
+
 end
 
 function scale_letterbox(width, height, w_ratio, h_ratio)

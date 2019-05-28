@@ -48,6 +48,13 @@ do
 			end
 			gprint(arrow, 300, 280)
 			gprint(to_print, 300, 280)
+
+			gprint("~ Panel Attack ~", 350, 180)
+			gprint("v".. VERSION, 725, 591)
+			set_color(1, 1, math.sin(love.timer.getTime() * 4) * .2 + .8)
+			menu_draw(IMG_vanity_sign, 760, 590)
+			set_color(1, 1, 1)
+
 			coroutine.yield()
 			local ret = nil
 			variable_step(function()

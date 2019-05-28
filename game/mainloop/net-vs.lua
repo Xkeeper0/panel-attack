@@ -109,29 +109,34 @@ function main_net_vs()
 		if end_text then
 			undo_stonermode()
 			json_send({game_over=true, outcome=outcome_claim})
-			local now = os.date("*t",to_UTC(os.time()))
-			local sep = "/"
-			local path = "replays"..sep.."v"..VERSION..sep..string.format("%04d"..sep.."%02d"..sep.."%02d", now.year, now.month, now.day)
-			local rep_a_name, rep_b_name = my_name, op_name
+
 			--sort player names alphabetically for folder name so we don't have a folder "a-vs-b" and also "b-vs-a"
-			if rep_b_name <  rep_a_name then
-				path = path..sep..rep_b_name.."-vs-"..rep_a_name
-			else
-				path = path..sep..rep_a_name.."-vs-"..rep_b_name
+			local player_names = my_name .." vs ".. op_name
+			if op_name < my_name then
+				player_names = op_name .." vs ".. op_name
 			end
-			local filename = "v"..VERSION.."-"..string.format("%04d-%02d-%02d-%02d-%02d-%02d", now.year, now.month, now.day, now.hour, now.min, now.sec).."-"..rep_a_name.."-L"..P1.level.."-vs-"..rep_b_name.."-L"..P2.level
-			if match_type and match_type ~= "" then
-				filename = filename.."-"..match_type
-			end
-			if outcome_claim == 1 or outcome_claim == 2 then
-				filename = filename.."-P"..outcome_claim.."wins"
-			elseif outcome_claim == 0 then
-				filename = filename.."-draw"
-			end
-			filename = filename..".txt"
-			print("saving replay as "..path..sep..filename)
+
+			local now = os.date("*t",to_UTC(os.time()))
+			local path = string.format("replays/v%s/%04d-%02d-%02d/%s/", VERSION, now.year, now.month, now.day, player_names)
+
+			local filename = string.format("%04d-%02d-%02d %02d-%02d-%02d - %s (L%d) vs %s (L%d), %s, %s.txt",
+					now.year,
+					now.month,
+					now.day,
+					now.hour,
+					now.min,
+					now.sec,
+					my_name,
+					P1.level,
+					op_name,
+					P2.level,
+					match_type,
+					(outcome_claim == 0 and "Draw" or ("P".. tostring(outcome_claim) .." won"))
+				)
+
+			Log:info("Saving replay as", path, filename)
 			write_replay_file(path, filename)
-			print("also saving replay as replay.txt")
+			Log:info("Also saving as current replay.")
 			write_replay_file()
 			character_select_mode = "2p_net_vs"
 			if currently_spectating then

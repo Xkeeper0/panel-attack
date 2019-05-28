@@ -74,7 +74,7 @@ function write_replay_file(path, filename) pcall(function()
 	local file
 	if path and filename then
 		love.filesystem.createDirectory(path)
-		file = love.filesystem.newFile(path.."/"..filename)
+		file = love.filesystem.newFile(path .. filename)
 	else
 		file = love.filesystem.newFile("replay.txt")
 	end
@@ -110,7 +110,7 @@ function read_puzzles() pcall(function()
 	-- if type(replay.in_buf) == "table" then
 		-- replay.in_buf=table.concat(replay.in_buf)
 	-- end
-	
+
 	puzzle_packs = love.filesystem.getDirectoryItems("puzzles") or {}
 	print("loading custom puzzles...")
 	for _,filename in pairs(puzzle_packs) do
@@ -128,7 +128,7 @@ function read_puzzles() pcall(function()
 				puzzle_sets[set_name] = puzzle_set
 			end
 			print("loaded above set")
-		end    
+		end
 	end
 end) end
 
@@ -160,26 +160,26 @@ function recursive_copy(source, destination)
 		if lfs.isDirectory(source.."/"..name) then
 			print("calling recursive_copy(source".."/"..name..", ".. destination.."/"..name..")")
 			recursive_copy(source.."/"..name, destination.."/"..name)
-			
+
 		elseif lfs.isFile(source.."/"..name) then
 			if not lfs.isDirectory(destination) then
 			 love.filesystem.createDirectory(destination)
 			end
 			print("copying file:  "..source.."/"..name.." to "..destination.."/"..name)
-			
+
 			local source_file = lfs.newFile(source.."/"..name)
 			source_file:open("r")
 			local source_size = source_file:getSize()
 			temp = source_file:read(source_size)
 			source_file:close()
-			
+
 			local new_file = lfs.newFile(destination.."/"..name)
 			new_file:open("w")
 			local success, message =  new_file:write(temp, source_size)
 			new_file:close()
-			
+
 			print(message)
-		else 
+		else
 			print("name:  "..name.." isn't a directory or file?")
 		end
 	end

@@ -182,8 +182,8 @@ function frames_to_time_string(frame_count, include_60ths_of_secs)
 	local min_sec_sep = ":"
 	local sec_60th_sep = "'"
 	local ret = ""
-	if frame_count >= 216000 then 
-		--enough to include hours 
+	if frame_count >= 216000 then
+		--enough to include hours
 		ret = ret..math.floor(frame_count / 216000)
 		--minutes with 2 digits (like 05 instead of 5)
 		ret = ret..hour_min_sep..string.format("%02d", math.floor(frame_count / 3600 % 3600))
@@ -217,12 +217,44 @@ end
 
 -- split the input string on some separator, returns table
 function split(inputstr, sep)
-		sep = sep or '%s'
-		local t = {}
-		for field, s in string.gmatch(inputstr, "([^" .. sep .. "]*)(" .. sep .. "?)") do
-				table.insert(t, field)
-				if s == "" then
-						return t
-				end
+	sep = sep or '%s'
+	local t = {}
+	for field, s in string.gmatch(inputstr, "([^" .. sep .. "]*)(" .. sep .. "?)") do
+		table.insert(t, field)
+		if s == "" then
+			return t
 		end
+	end
+end
+
+
+do
+	local function show(val)
+		if type(val) == "string" then
+			return '"' .. val .. '"'
+		else
+			return tostring(val)
+		end
+	end
+	function tprint(t, indent, done)
+		if type(t) ~= "table" then
+			print("tprint got " .. type(t))
+			return
+		end
+
+		done = done or {}
+		indent = indent or 0
+		for key, value in pairs(t) do
+			local indents = string.rep(" ", indent) -- indent it
+			if type(value) == "table" and not done[value] then
+				done[value] = true
+				print(indents .. show(key) .. ":");
+				tprint(value, indent + 2, done)
+			elseif done[value] then
+				print(indents .. show(key) .. " = " .. show(value) .. " ??? recursion?")
+			else
+				print(indents .. show(key) .. " = " .. show(value))
+			end
+		end
+	end
 end

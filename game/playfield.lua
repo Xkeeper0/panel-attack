@@ -9,162 +9,164 @@ local d_col = {up=0, down=0, left=-1, right=1}
 local d_row = {up=1, down=-1, left=0, right=0}
 
 Playfield = class(function(s, which, mode, speed, difficulty, player_number)
-		s.character = uniformly(characters)
-		s.max_health = 1
-		s.mode = mode or "endless"
-		if mode ~= "puzzle" then
-			s.do_first_row = true
+	s.character = uniformly(characters)
+	s.max_health = 1
+	s.mode = mode or "endless"
+	if mode ~= "puzzle" then
+		s.do_first_row = true
+	end
+	if s.mode == "endless" then
+			s.NCOLORS = difficulty_to_ncolors_endless[difficulty]
+	end
+	if s.mode == "time" then
+			s.NCOLORS = difficulty_to_ncolors_1Ptime[difficulty]
+	end
+
+	if s.mode == "2ptime" or s.mode == "vs" then
+		local level = speed or 5
+		s.character = (type(difficulty) == "string") and difficulty or s.character
+		s.level     = level
+
+		--difficulty         = level_to_difficulty[level]
+		speed                = level_to_starting_speed[level]
+		s.speed_times        = {15*60, idx=1, delta=15*60}
+		s.max_health         = level_to_hang_time[level]
+		s.FRAMECOUNT_HOVER   = level_to_hover[s.level]
+		s.FRAMECOUNT_GPHOVER = level_to_garbage_panel_hover[s.level]
+		s.FRAMECOUNT_FLASH   = level_to_flash[s.level]
+		s.FRAMECOUNT_FACE    = level_to_face[s.level]
+		s.FRAMECOUNT_POP     = level_to_pop[s.level]
+		s.combo_constant     = level_to_combo_constant[s.level]
+		s.combo_coefficient  = level_to_combo_coefficient[s.level]
+		s.chain_constant     = level_to_chain_constant[s.level]
+		s.chain_coefficient  = level_to_chain_coefficient[s.level]
+
+		if s.mode == "2ptime" then
+			s.NCOLORS = level_to_ncolors_time[level]
+		else
+			s.NCOLORS = level_to_ncolors_vs[level]
 		end
-		if s.mode == "endless" then
-				s.NCOLORS = difficulty_to_ncolors_endless[difficulty]
+	end
+	s.health = s.max_health
+
+	s.garbage_cols = {{1,2,3,4,5,6,idx=1},
+						{1,3,5,idx=1},
+						{1,4,idx=1},
+						{1,2,3,idx=1},
+						{1,2,idx=1},
+						{1,idx=1}}
+	s.later_garbage   = {}
+	s.garbage_q       = GarbageQueue()
+	-- garbage_to_send[frame] is an array of garbage to send at frame.
+	-- garbage_to_send.chain is an array of garbage to send when the chain ends.
+	s.garbage_to_send = {}
+	s.pos_x           = 4 -- Position of the play area on the screen
+	s.pos_y           = 4
+	s.score_x         = 315
+	s.panel_buffer    = ""
+	s.gpanel_buffer   = ""
+	s.input_buffer    = ""
+	s.panels          = {}
+	s.width           = 6
+	s.height          = 12
+	for i=0,s.height do
+		s.panels[i] = {}
+		for j=1,s.width do
+			s.panels[i][j] = Panel()
 		end
-		if s.mode == "time" then
-				s.NCOLORS = difficulty_to_ncolors_1Ptime[difficulty]
-		end
+	end
 
-		if s.mode == "2ptime" or s.mode == "vs" then
-			local level = speed or 5
-			s.character = (type(difficulty) == "string") and difficulty or s.character
-			s.level = level
+	s.CLOCK              = 0
+	s.game_stopwatch     = 0
+	s.do_countdown       = true
+	s.max_runs_per_frame = 3
 
-			--difficulty			= level_to_difficulty[level]
-			speed					= level_to_starting_speed[level]
-			s.speed_times			= {15*60, idx=1, delta=15*60}
-			s.max_health			= level_to_hang_time[level]
-			s.FRAMECOUNT_HOVER		= level_to_hover[s.level]
-			s.FRAMECOUNT_GPHOVER	= level_to_garbage_panel_hover[s.level]
-			s.FRAMECOUNT_FLASH		= level_to_flash[s.level]
-			s.FRAMECOUNT_FACE		= level_to_face[s.level]
-			s.FRAMECOUNT_POP		= level_to_pop[s.level]
-			s.combo_constant		= level_to_combo_constant[s.level]
-			s.combo_coefficient		= level_to_combo_coefficient[s.level]
-			s.chain_constant		= level_to_chain_constant[s.level]
-			s.chain_coefficient		= level_to_chain_coefficient[s.level]
+	s.displacement       = 16
+	-- This variable indicates how far below the top of the play
+	-- area the top row of panels actually is.
+	-- This variable being decremented causes the stack to rise.
+	-- During the automatic rising routine, if this variable is 0,
+	-- it's reset to 15, all the panels are moved up one row,
+	-- and a new row is generated at the bottom.
+	-- Only when the displacement is 0 are all 12 rows "in play."
 
-			if s.mode == "2ptime" then
-				s.NCOLORS = level_to_ncolors_time[level]
-			else
-				s.NCOLORS = level_to_ncolors_vs[level]
-			end
-		end
-		s.health = s.max_health
-
-		s.garbage_cols = {{1,2,3,4,5,6,idx=1},
-							{1,3,5,idx=1},
-							{1,4,idx=1},
-							{1,2,3,idx=1},
-							{1,2,idx=1},
-							{1,idx=1}}
-		s.later_garbage = {}
-		s.garbage_q = GarbageQueue()
-		-- garbage_to_send[frame] is an array of garbage to send at frame.
-		-- garbage_to_send.chain is an array of garbage to send when the chain ends.
-		s.garbage_to_send = {}
-		s.pos_x = 4   -- Position of the play area on the screen
-		s.pos_y = 4
-		s.score_x = 315
-		s.panel_buffer = ""
-		s.gpanel_buffer = ""
-		s.input_buffer = ""
-		s.panels = {}
-		s.width = 6
-		s.height = 12
-		for i=0,s.height do
-			s.panels[i] = {}
-			for j=1,s.width do
-				s.panels[i][j] = Panel()
-			end
-		end
-
-		s.CLOCK = 0
-		s.game_stopwatch = 0
-		s.do_countdown = true
-		s.max_runs_per_frame = 3
-
-		s.displacement = 16
-		-- This variable indicates how far below the top of the play
-		-- area the top row of panels actually is.
-		-- This variable being decremented causes the stack to rise.
-		-- During the automatic rising routine, if this variable is 0,
-		-- it's reset to 15, all the panels are moved up one row,
-		-- and a new row is generated at the bottom.
-		-- Only when the displacement is 0 are all 12 rows "in play."
+	s.debug_garbage_update = true
 
 
-		s.danger_col = {false,false,false,false,false,false}
-		-- set true if this column is near the top
-		s.danger_timer = 0   -- decides bounce frame when in danger
+	s.danger_col = {false,false,false,false,false,false}
+	-- set true if this column is near the top
+	s.danger_timer = 0   -- decides bounce frame when in danger
 
-		s.difficulty = difficulty or 2
+	s.difficulty = difficulty or 2
 
-		s.speed = speed or 1   -- The player's speed level decides the amount of time
-						 -- the stack takes to rise automatically
-		if s.speed_times == nil then
-			s.panels_to_speedup = panels_to_next_speed[s.speed]
-		end
-		s.rise_timer = 1   -- When this value reaches 0, the stack will rise a pixel
-		s.rise_lock = false   -- If the stack is rise locked, it won't rise until it is
-							-- unlocked.
-		s.has_risen = false   -- set once the stack rises once during the game
+	s.speed = speed or 1   -- The player's speed level decides the amount of time
+					 -- the stack takes to rise automatically
+	if s.speed_times == nil then
+		s.panels_to_speedup = panels_to_next_speed[s.speed]
+	end
+	s.rise_timer = 1   -- When this value reaches 0, the stack will rise a pixel
+	s.rise_lock = false   -- If the stack is rise locked, it won't rise until it is
+						-- unlocked.
+	s.has_risen = false   -- set once the stack rises once during the game
 
-		s.stop_time = 0
-		s.pre_stop_time = 0
+	s.stop_time = 0
+	s.pre_stop_time = 0
 
-		s.NCOLORS = s.NCOLORS or 5
-		s.score = 0         -- der skore
-		s.chain_counter = 0   -- how high is the current chain?
+	s.NCOLORS = s.NCOLORS or 5
+	s.score = 0         -- der skore
+	s.chain_counter = 0   -- how high is the current chain?
 
-		s.panels_in_top_row = false -- boolean, for losing the game
-		s.danger = s.danger or false  -- boolean, panels in the top row (danger)
-		s.danger_music = s.danger_music or false -- changes music state
+	s.panels_in_top_row = false -- boolean, for losing the game
+	s.danger = s.danger or false  -- boolean, panels in the top row (danger)
+	s.danger_music = s.danger_music or false -- changes music state
 
-		s.n_active_panels = 0
-		s.prev_active_panels = 0
-		s.n_chain_panels= 0
+	s.n_active_panels = 0
+	s.prev_active_panels = 0
+	s.n_chain_panels= 0
 
-			 -- These change depending on the difficulty and speed levels:
-		s.FRAMECOUNT_HOVER = s.FRAMECOUNT_HOVER or FC_HOVER[s.difficulty]
-		s.FRAMECOUNT_FLASH = s.FRAMECOUNT_FLASH or FC_FLASH[s.difficulty]
-		s.FRAMECOUNT_FACE  = s.FRAMECOUNT_FACE or FC_FACE[s.difficulty]
-		s.FRAMECOUNT_POP   = s.FRAMECOUNT_POP or FC_POP[s.difficulty]
-		s.FRAMECOUNT_MATCH = s.FRAMECOUNT_FACE + s.FRAMECOUNT_FLASH
-		s.FRAMECOUNT_RISE  = speed_to_rise_time[s.speed]
+		 -- These change depending on the difficulty and speed levels:
+	s.FRAMECOUNT_HOVER = s.FRAMECOUNT_HOVER or FC_HOVER[s.difficulty]
+	s.FRAMECOUNT_FLASH = s.FRAMECOUNT_FLASH or FC_FLASH[s.difficulty]
+	s.FRAMECOUNT_FACE  = s.FRAMECOUNT_FACE or FC_FACE[s.difficulty]
+	s.FRAMECOUNT_POP   = s.FRAMECOUNT_POP or FC_POP[s.difficulty]
+	s.FRAMECOUNT_MATCH = s.FRAMECOUNT_FACE + s.FRAMECOUNT_FLASH
+	s.FRAMECOUNT_RISE  = speed_to_rise_time[s.speed]
 
-		s.rise_timer = s.FRAMECOUNT_RISE
+	s.rise_timer = s.FRAMECOUNT_RISE
 
-			 -- Player input stuff:
-		s.manual_raise = false   -- set until raising is completed
-		s.manual_raise_yet = false  -- if not set, no actual raising's been done yet
-								 -- since manual raise button was pressed
-		s.prevent_manual_raise = false
-		s.swap_1 = false   -- attempt to initiate a swap on this frame
-		s.swap_2 = false
+		 -- Player input stuff:
+	s.manual_raise = false   -- set until raising is completed
+	s.manual_raise_yet = false  -- if not set, no actual raising's been done yet
+							 -- since manual raise button was pressed
+	s.prevent_manual_raise = false
+	s.swap_1 = false   -- attempt to initiate a swap on this frame
+	s.swap_2 = false
 
-		s.cur_wait_time = 25   -- number of ticks to wait before the cursor begins
-							 -- to move quickly... it's based on P1CurSensitivity
-		s.cur_timer = 0   -- number of ticks for which a new direction's been pressed
-		s.cur_dir = nil     -- the direction pressed
-		s.cur_row = 7  -- the row the cursor's on
-		s.cur_col = 3  -- the column the left half of the cursor's on
-		s.top_cur_row = s.height + (s.mode == "puzzle" and 0 or -1)
+	s.cur_wait_time = 25   -- number of ticks to wait before the cursor begins
+						 -- to move quickly... it's based on P1CurSensitivity
+	s.cur_timer = 0   -- number of ticks for which a new direction's been pressed
+	s.cur_dir = nil     -- the direction pressed
+	s.cur_row = 7  -- the row the cursor's on
+	s.cur_col = 3  -- the column the left half of the cursor's on
+	s.top_cur_row = s.height + (s.mode == "puzzle" and 0 or -1)
 
-		s.move_sound = false  -- this is set if the cursor movement sound should be played
-		s.poppedPanelIndex = s.poppedPanelIndex or 1
-		s.panels_cleared = s.panels_cleared or 0
-		s.metal_panels_queued = s.metal_panels_queued or 0
-		s.lastPopLevelPlayed = s.lastPopLevelPlayed or 1
-		s.lastPopIndexPlayed = s.lastPopIndexPlayed or 1
-		s.game_over = false
+	s.move_sound = false  -- this is set if the cursor movement sound should be played
+	s.poppedPanelIndex = s.poppedPanelIndex or 1
+	s.panels_cleared = s.panels_cleared or 0
+	s.metal_panels_queued = s.metal_panels_queued or 0
+	s.lastPopLevelPlayed = s.lastPopLevelPlayed or 1
+	s.lastPopIndexPlayed = s.lastPopIndexPlayed or 1
+	s.game_over = false
 
-		s.card_q = Queue()
+	s.card_q = Queue()
 
-		s.which = which or 1 -- Pk.which == k
-		s.player_number = player_number or s.which --player number according to the multiplayer server, for game outcome reporting
+	s.which = which or 1 -- Pk.which == k
+	s.player_number = player_number or s.which --player number according to the multiplayer server, for game outcome reporting
 
-		s.shake_time = 0
+	s.shake_time = 0
 
-		s.prev_states = {}
-	end)
+	s.prev_states = {}
+end)
 
 function Playfield:mkcpy(other)
 	if other == nil then
@@ -349,14 +351,14 @@ end
 
 --foreign_run is for a stack that belongs to another client.
 function Playfield:foreign_run()
-	local times_to_run	= 0
-	local buffer_len	= string.len(self.input_buffer)
+	local times_to_run = 0
+	local buffer_len = string.len(self.input_buffer)
 	if buffer_len >= 15 then
-		times_to_run	= self.max_runs_per_frame
+		times_to_run = self.max_runs_per_frame
 	elseif buffer_len >= 10 then
-		times_to_run	= 2
+		times_to_run = 2
 	elseif buffer_len >= 1 then
-		times_to_run	= 1
+		times_to_run = 1
 	end
 
 	if self.play_to_end then
@@ -736,7 +738,7 @@ function Playfield:PdP()
 										end
 									end
 								elseif panels[row-1][col].state
-										== "hovering" then
+ == "hovering" then
 									-- swap may have landed on a hover
 									self:set_hoverers(row,col,
 											self.FRAMECOUNT_HOVER,false,true,
@@ -1230,11 +1232,11 @@ function Playfield:swap()
 	-- then you can't take it back since it will start falling.
 	if self.cur_row ~= 1 then
 		if (panels[row][col].color ~= 0) and (panels[row-1][col].color
-				== 0 or panels[row-1][col].state == "falling") then
+ == 0 or panels[row-1][col].state == "falling") then
 			panels[row][col].dont_swap = true
 		end
 		if (panels[row][col+1].color ~= 0) and (panels[row-1][col+1].color
-				== 0 or panels[row-1][col+1].state == "falling") then
+ == 0 or panels[row-1][col+1].state == "falling") then
 			panels[row][col+1].dont_swap = true
 		end
 	end
@@ -1323,6 +1325,7 @@ function Playfield:set_combo_garbage(n_combo, n_metal)
 		end
 	end
 	self.garbage_to_send[self.CLOCK + GARBAGE_TRANSIT_TIME] = stuff_to_send
+	self.debug_garbage_update = true
 end
 
 -- the chain is over!
@@ -1341,6 +1344,8 @@ function Playfield:set_chain_garbage(n_chain)
 		self.garbage_to_send.chain = nil
 	end
 	tab[#tab+1] = {6, n_chain-1, false, true}
+	self.debug_garbage_update = true
+
 end
 
 function Playfield:really_send(to_send)
@@ -2091,6 +2096,67 @@ function Playfield:render()
 		if P1 and P1.game_stopwatch and tonumber(P1.game_stopwatch) then
 			gprint(frames_to_time_string(P1.game_stopwatch, P1.mode == "endless"), 385, 25)
 		end
+
+
+		if self.debug_garbage_update then
+			Log:info("Garbage info 'garbage_to_send'", self.garbage_to_send)
+			Log:info("Garbage info 'later_garbage'", self.later_garbage)
+			self.debug_garbage_update = false
+		end
+
+		local garbageDisplay = {
+			combo3 = 0,
+			combo4 = 0,
+			combo5 = 0,
+			combo6 = 0,
+			shock = 0,
+			}
+		local garbageCards = {
+			combo3 = IMG_cards[false][3],
+			combo4 = IMG_cards[false][4],
+			combo5 = IMG_cards[false][5],
+			combo6 = IMG_cards[false][6],
+			shock = IMG_cards['shock'],
+			}
+
+		--gprint("w  h  !  x", self.score_x + 30, 400)
+		for k,v in pairs(self.garbage_to_send) do
+			for kk, vv in pairs(v) do
+				--gprint(string.format("%s[%s]| %d %d %s%s", k, kk, vv[1], vv[2], vv[3] and "!" or " ", vv[4] and "x" or " "), self.score_x, 420 + yops * 15)
+				--menu_draw(IMG_cards[vv[4]][vv[4] and vv[2] or vv[1]], self.score_x, 420 + yops * 15, 0, 2, 2)
+				--yops = yops + 2
+
+				if vv[3] then
+					garbageDisplay['shock'] = garbageDisplay['shock'] + vv[2]
+				elseif vv[4] then
+					garbageDisplay['chain']	= vv[2]
+				else
+					garbageDisplay['combo'..tostring(vv[1])] = garbageDisplay['combo'..tostring(vv[1])] + 1
+				end
+			end
+		end
+
+		local yTop = 340
+		local xOfs = 0
+		local yOfs = 0
+		local yInc = 48
+		local xInc = 24
+		if self.chain_counter > 1 then
+			menu_draw(IMG_cards[true][self.chain_counter - 1], self.score_x, yTop + yOfs * yInc, 0, 3, 3)
+			yOfs = yOfs + 1
+		end
+		for k,v in pairs(garbageDisplay) do
+			if v > 0 then
+				for i = 1, v do
+					menu_draw(garbageCards[k], self.score_x + xOfs * xInc, yTop + yOfs * yInc, 0, 3, 3)
+					xOfs = xOfs + 1
+				end
+				xOfs = 0
+				yOfs = yOfs + 1
+			end
+		end
+
+
 		--[[
 		if not config.debug_mode then
 			gprint(join_community_msg or "", 330, 560)

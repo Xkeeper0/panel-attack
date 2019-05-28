@@ -113,17 +113,19 @@ function graphics_init()
 	IMG_cards = {}
 	IMG_cards[true] = {}
 	IMG_cards[false] = {}
-	for i=4,66 do
+	for i=3,66 do
 		IMG_cards[false][i] = load_img("combo"
 			..tostring(math.floor(i/10))..tostring(i%10)..".png")
 	end
-	for i=2,13 do
+	for i=1,13 do
 		IMG_cards[true][i] = load_img("chain"
 			..tostring(math.floor(i/10))..tostring(i%10)..".png")
 	end
 	for i=14,99 do
 		IMG_cards[true][i] = load_img("chain00.png")
 	end
+	IMG_cards['shock'] = load_img("shock.png")
+
 	IMG_character_icons = {}
 	for _, name in ipairs(characters) do
 		IMG_character_icons[name] = load_img(""..name.."/icon.png")

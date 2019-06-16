@@ -2,7 +2,30 @@
 function fmainloop()
 	local func, arg = main_select_mode, nil
 	replay = {}
-	config = {character="yoshi", level=5, name="defaultname", master_volume=100, SFX_volume=100, music_volume=100, debug_mode=false, ready_countdown_1P = true, save_replays_publicly = "with my name", assets_dir=default_assets_dir, sounds_dir=default_sounds_dir}
+	-- Default configuration values
+	config = {
+		-- Player character
+		character                     = "yoshi",
+		-- Level (2P modes / 1P vs yourself mode)
+		level                         = 5,
+		-- Player name
+		name                          = "defaultname",
+		-- Volume settings
+		master_volume                 = 100,
+		SFX_volume                    = 100,
+		music_volume                  = 100,
+		-- Debug mode flag
+		debug_mode                    = false,
+		-- Enable ready countdown flag
+		ready_countdown_1P            = true,
+		-- Change danger music back later flag
+		danger_music_changeback_delay = false,
+		-- Save replays setting
+		save_replays_publicly         = "with my name",
+		-- Default directories for graphics/sounds
+		assets_dir                    = default_assets_dir,
+		sounds_dir                    = default_sounds_dir
+	}
 	gprint("Reading config file", 300, 280)
 	coroutine.yield()
 	read_conf_file() -- TODO: stop making new config files
@@ -208,9 +231,11 @@ function main_dumb_transition(next_func, text, timemin, timemax)
 				ret = {next_func}
 			end
 			t = t + 1
-			if TCP_sock then
-			--  do_messages()
-			end
+			--if TCP_sock then
+			--	if not do_messages() then
+			--		-- do something? probably shouldn't drop back to the main menu transition since we're already here
+			--	end
+			--end
 		end)
 		if ret then
 			return unpack(ret)

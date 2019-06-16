@@ -12,7 +12,9 @@ function main_net_vs_setup(ip)
 	while not connection_is_ready() do
 		gprint("Connecting...", 300, 280)
 		coroutine.yield()
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 	end
 	connected_server_ip = ip
 	logged_in = false
@@ -22,14 +24,18 @@ function main_net_vs_setup(ip)
 	while got_opponent == nil do
 		gprint("Waiting for opponent...", 300, 280)
 		coroutine.yield()
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 	end
 	while P1_level == nil or P2_level == nil do
 		to_print = (P1_level and "L" or"Choose l") .. "evel: "..my_level..
 				"\nOpponent's level: "..(P2_level or "???")
 		gprint(to_print, 300, 280)
 		coroutine.yield()
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 		variable_step(function()
 			if P1_level then
 			elseif menu_enter(k) then
@@ -68,13 +74,17 @@ function main_net_vs_setup(ip)
 	end
 	for i=1,30 do
 		gprint(to_print,300, 280)
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 		coroutine.yield()
 	end
 	while P1.panel_buffer == "" or P2.panel_buffer == ""
 		or P1.gpanel_buffer == "" or P2.gpanel_buffer == "" do
 		gprint(to_print,300, 280)
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 		coroutine.yield()
 	end
 	P1:starting_state()

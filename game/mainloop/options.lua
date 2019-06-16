@@ -45,6 +45,7 @@ function main_options(starting_idx)
 			{"Graphics set", config.assets_dir or default_assets_dir, "multiple choice", asset_sets},
 			{"Sounds set", config.sounds_dir or default_sounds_dir, "multiple choice", sound_sets},
 			{"Ready countdown", ready_countdown_1P_text[config.ready_countdown_1P or false], "bool", true, nil, nil,false},
+			{"Danger music change-back delay", danger_music_changeback_delay_text[config.danger_music_changeback_delay or false], "bool", false, nil, nil, false},
 			{"Back", "", nil, nil, nil, nil, false, main_select_mode}
 		}
 	end
@@ -57,11 +58,11 @@ function main_options(starting_idx)
 				arrow = arrow .. "\n"
 			end
 			to_print = to_print .. "   " .. items[i][1] .. "\n"
-			to_print2 = to_print2 .. "                  "
+			to_print2 = to_print2 .. "                            "
 			if active_idx == i and selected then
-				to_print2 = to_print2 .. "                < "
+				to_print2 = to_print2 .. "                          < "
 			else
-				to_print2 = to_print2 .. "                  "
+				to_print2 = to_print2 .. "                            "
 			end
 			to_print2 = to_print2.. items[i][2]
 			if active_idx == i and selected then
@@ -69,9 +70,9 @@ function main_options(starting_idx)
 			end
 			to_print2 = to_print2 .. "\n"
 		end
-		gprint(arrow, 300, 280)
-		gprint(to_print, 300, 280)
-		gprint(to_print2, 300, 280)
+		gprint(arrow, 240, 280)
+		gprint(to_print, 240, 280)
+		gprint(to_print2, 240, 280)
 	end
 	local function adjust_left()
 		if items[active_idx][3] == "numeric" then
@@ -156,6 +157,9 @@ function main_options(starting_idx)
 						config.ready_countdown_1P = not config.ready_countdown_1P
 						items[active_idx][2] = ready_countdown_1P_text[config.ready_countdown_1P]
 					end
+					if items[active_idx][1] == "Danger music change-back delay" then
+						config.danger_music_changeback_delay = not config.danger_music_changeback_delay
+						items[active_idx][2] = danger_music_changeback_delay_text[config.danger_music_changeback_delay]
 					--add any other bool config updates here
 				elseif items[active_idx][3] == "numeric" then
 					if config.master_volume ~= items[1][2] then

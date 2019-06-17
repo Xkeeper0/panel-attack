@@ -505,7 +505,7 @@ function Playfield:PdP()
 				--currently playing danger
 				local toggle_back = true
 				-- Normally, change back if nothing is in the top 3 rows
-				local changeback_rows = {{panels[self.height], panels[self.height-1], panels[self.height-2]}}
+				local changeback_rows = {panels[self.height], panels[self.height-1], panels[self.height-2]}
 				-- But optionally, wait until nothing is in the fourth row
 				if (config.danger_music_changeback_delay) then
 					table.insert(changeback_rows, panels[self.height-3])

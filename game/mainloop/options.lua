@@ -160,6 +160,7 @@ function main_options(starting_idx)
 					if items[active_idx][1] == "Danger music change-back delay" then
 						config.danger_music_changeback_delay = not config.danger_music_changeback_delay
 						items[active_idx][2] = danger_music_changeback_delay_text[config.danger_music_changeback_delay]
+					end
 					--add any other bool config updates here
 				elseif items[active_idx][3] == "numeric" then
 					if config.master_volume ~= items[1][2] then

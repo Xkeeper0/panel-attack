@@ -1,5 +1,6 @@
 function main_replay_vs()
 	local replay = replay.vs
+	bg = IMG_stages[math.random(#IMG_stages)]
 	P1 = Playfield(1, "vs", replay.P1_level or 5)
 	P2 = Playfield(2, "vs", replay.P2_level or 5)
 	P1.do_countdown = replay.do_countdown or false

@@ -1,4 +1,5 @@
 function main_time_attack(...)
+	bg = IMG_stages[math.random(#IMG_stages)]
 	consuming_timesteps = true
 	P1 = Playfield(1, "time", ...)
 	make_local_panels(P1, "000000")

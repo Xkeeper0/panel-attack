@@ -23,6 +23,7 @@ spectator_list = nil
 spectators_string = ""
 debug_mode_text = {[true]="On", [false]="Off"}
 ready_countdown_1P_text = {[true]="On", [false]="Off"}
+danger_music_changeback_delay_text = {[true]="On", [false]="Off"}
 leftover_time = 0
 
 require "game.mainloop._"

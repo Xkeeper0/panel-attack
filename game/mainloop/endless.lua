@@ -1,4 +1,5 @@
 function main_endless(...)
+	bg = IMG_stages[math.random(#IMG_stages)]
 	consuming_timesteps = true
 	replay.endless = {}
 	local replay=replay.endless

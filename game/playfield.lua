@@ -489,7 +489,7 @@ function Playfield:PdP()
 
 	-- determine whether to play danger music
 		-- Changed this to play danger when something in top 3 rows
-		-- and to play casual when nothing in top 3 rows
+		-- and to play casual when nothing in top 3 or 4 rows
 		if not self.danger_music then
 				-- currently playing casual
 				for _, prow in pairs({panels[self.height], panels[self.height-1], panels[self.height-2]}) do
@@ -504,7 +504,13 @@ function Playfield:PdP()
 		else
 				--currently playing danger
 				local toggle_back = true
-				for _, prow in pairs({panels[self.height], panels[self.height-1], panels[self.height-1], panels[self.height-2]}) do
+				-- Normally, change back if nothing is in the top 3 rows
+				local changeback_rows = {panels[self.height], panels[self.height-1], panels[self.height-2]}
+				-- But optionally, wait until nothing is in the fourth row
+				if (config.danger_music_changeback_delay) then
+					table.insert(changeback_rows, panels[self.height-3])
+				end
+				for _, prow in pairs(changeback_rows) do
 						for idx=1, width do
 								if prow[idx].color ~= 0 then
 										toggle_back = false
@@ -737,8 +743,7 @@ function Playfield:PdP()
 													self.FRAMECOUNT_HOVER+1,false,false)
 										end
 									end
-								elseif panels[row-1][col].state
- == "hovering" then
+								elseif panels[row-1][col].state == "hovering" then
 									-- swap may have landed on a hover
 									self:set_hoverers(row,col,
 											self.FRAMECOUNT_HOVER,false,true,
@@ -833,7 +838,12 @@ function Playfield:PdP()
 						-- if a timer runs out and the routine can't
 						-- figure out what flag it is, tell brandon.
 						-- No seriously, email him or something.
-						error("something terrible happened")
+						error("something terrible happened\n"
+							.. "panel.state was " .. tostring(panel.state) .. " when a timer expired?!\n"
+							.. "panel.is_swapping_from_left = " .. tostring(panel.is_swapping_from_left) .. "\n"
+							.. "panel.dont_swap = " .. tostring(panel.dont_swap) .. "\n"
+							.. "panel.chaining = " .. tostring(panel.chaining)
+							)
 					end
 				-- the timer-expiring action has completed
 				end

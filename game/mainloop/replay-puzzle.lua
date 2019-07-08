@@ -1,4 +1,5 @@
 function main_replay_puzzle()
+	bg = IMG_stages[math.random(#IMG_stages)]
 	local replay = replay.puzzle
 	if replay.in_buf == nil or replay.in_buf == "" then
 		return main_dumb_transition,

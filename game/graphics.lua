@@ -13,7 +13,16 @@ function load_img(path_and_name)
 			print("loaded custom asset: "..config.assets_dir.."/"..path_and_name)
 		end
 	else
-		img = love.image.newImageData("assets/"..default_assets_dir.."/"..path_and_name)
+		if pcall(function ()
+			img = love.image.newImageData("assets/"..default_assets_dir.."/"..path_and_name)
+		end) then
+			print("loaded okay.")
+		else
+			img = nil
+		end
+	end
+	if img == nil then
+		return nil
 	end
 	local ret = love.graphics.newImage(img)
 	ret:setFilter("nearest","nearest")
@@ -68,6 +77,18 @@ function set_color(r, g, b, a)
 end
 
 function graphics_init()
+	title = load_img("menu/title.png")
+	charselect = load_img("menu/charselect.png")
+	IMG_stages = {}
+
+	local IMG_stagecount = 1
+	repeat
+		IMG_stages[IMG_stagecount] = load_img("stages/" .. tostring(IMG_stagecount) .. ".png")
+		if IMG_stages[IMG_stagecount] then
+			IMG_stagecount = IMG_stagecount + 1
+		end
+	until not IMG_stages[IMG_stagecount]
+
 	IMG_panels = {}
 	for i=1,8 do
 		IMG_panels[i]={}

@@ -1,6 +1,7 @@
 function make_main_puzzle(puzzles)
 	local awesome_idx, next_func = 1, nil
 	function next_func()
+		bg = IMG_stages[math.random(#IMG_stages)]
 		consuming_timesteps = true
 		replay.puzzle = {}
 		local replay = replay.puzzle
@@ -29,7 +30,7 @@ function make_main_puzzle(puzzles)
 						if awesome_idx == 1 then
 							ret = {main_dumb_transition, {main_select_puzz, "You win!", 30}}
 						else
-							ret = {main_dumb_transition, {ret, "You win!", 30}}
+							ret = {main_dumb_transition, {next_func, "You win!", 30}}
 						end
 					elseif P1.puzzle_moves == 0 then
 						write_replay_file()
@@ -58,6 +59,7 @@ do
 	function main_select_puzz()
 		love.audio.stop()
 		stop_the_music()
+		bg = title
 		local active_idx = last_puzzle_idx or 1
 		local k = K[1]
 		while true do

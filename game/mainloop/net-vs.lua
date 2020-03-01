@@ -1,5 +1,6 @@
 function main_net_vs()
 	--STONER_MODE = true
+	bg = IMG_stages[math.random(#IMG_stages)]
 	local k = K[1]  --may help with spectators leaving games in progress
 	local end_text = nil
 	consuming_timesteps = true
@@ -62,7 +63,9 @@ function main_net_vs()
 				json_send({leave_room=true})
 				return main_net_vs_lobby
 			end
-			do_messages()
+			if not do_messages() then
+				return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+			end
 		end
 
 		--print(P1.CLOCK, P2.CLOCK)

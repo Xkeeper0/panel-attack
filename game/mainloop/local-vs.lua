@@ -1,5 +1,6 @@
 function main_local_vs()
 	-- TODO: replay!
+	bg = IMG_stages[math.random(#IMG_stages)]
 	consuming_timesteps = true
 	local end_text = nil
 	while true do

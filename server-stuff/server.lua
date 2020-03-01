@@ -37,8 +37,7 @@ local name_to_idx = {}
 local socket_to_idx = {}
 local proposals = {}
 local playerbases = {}
-local loaded_placement_matches = {incomplete={},
-																	complete={}}
+local loaded_placement_matches = {incomplete={}, complete={}}
 
 function lobby_state()
 	local names = {}
@@ -488,7 +487,7 @@ function Connection.login(self, user_id)
 	--print("Connection.login was called!")
 	self.user_id = user_id
 	self.logged_in = false
-	local IP_logging_in, port = self.socket:getsockname()
+	local IP_logging_in, port = self.socket:getpeername()
 	print("New login attempt:  "..IP_logging_in..":"..port)
 	if is_banned(IP_logging_in) then
 		deny_login(self, "Awaiting ban timeout")
@@ -1341,7 +1340,6 @@ function Connection.read(self)
 	local junk, err, data = self.socket:receive("*a")
 	if not err then
 		data = junk
-		
 	end
 	if data and data:len() > 0 then
 		self:data_received(data)

@@ -221,7 +221,9 @@ function main_net_vs_lobby()
 			print("#items: "..#items.."  idx_old: "..prev_act_idx.."  idx_new: "..active_idx.."  active_back: "..tostring(active_back))
 			prev_act_idx = active_idx
 		end
-		do_messages()
+		if not do_messages() then
+			return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+		end
 	end
 end
 

@@ -6,6 +6,7 @@ do
 		currently_spectating = false
 		stop_the_music()
 		close_socket()
+		bg = title
 		logged_in = 0
 		connection_up_time = 0
 		connected_server_ip = ""

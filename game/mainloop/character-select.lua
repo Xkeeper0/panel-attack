@@ -1,6 +1,7 @@
 function main_character_select()
 	love.audio.stop()
 	stop_the_music()
+	bg = charselect
 	local map = {}
 
 	-- -------------------------------------------------------
@@ -18,11 +19,13 @@ function main_character_select()
 			end
 			gprint("Waiting for room initialization...", 300, 280)
 			coroutine.yield()
-			do_messages()
+			if not do_messages() then
+				return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+			end
 			retries = retries + 1
 		end
 		if not global_initialize_room_msg then
-			return main_dumb_transition, {main_select_mode, "Failed to connect.\n\nReturning to main menu", 60, 300}
+			return main_dumb_transition, {main_select_mode, "Room initialization failed.\n\nReturning to main menu", 60, 300}
 		end
 		msg = global_initialize_room_msg
 		global_initialize_room_msg = nil
@@ -407,7 +410,9 @@ function main_character_select()
 					end
 					for i=1,30 do
 						gprint(to_print .. " - " .. i, 300, 280)
-						do_messages()
+						if not do_messages() then
+							return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+						end
 						coroutine.yield()
 					end
 					local game_start_timeout = 0
@@ -421,7 +426,9 @@ function main_character_select()
 						print("P1.gpanel_buffer = "..P1.gpanel_buffer)
 						print("P2.gpanel_buffer = "..P2.gpanel_buffer)
 						gprint(to_print,300, 280)
-						do_messages()
+						if not do_messages() then
+							return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+						end
 						coroutine.yield()
 						if game_start_timeout > 250 then
 							return main_dumb_transition, {main_select_mode,
@@ -638,7 +645,9 @@ function main_character_select()
 			return main_dumb_transition, {main_local_vs_yourself, "Game is starting...", 30, 30}
 		end
 		if character_select_mode == "2p_net_vs" then
-			do_messages()
+			if not do_messages() then
+				return main_dumb_transition, {main_select_mode, "Disconnected from server.\n\nReturning to main menu...", 60, 300}
+			end
 		end
 	end
 end

@@ -1,4 +1,5 @@
 function main_replay_endless()
+	bg = IMG_stages[math.random(#IMG_stages)]
 	local replay = replay.endless
 	if replay == nil or replay.speed == nil then
 		return main_dumb_transition,

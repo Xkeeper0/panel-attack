@@ -139,10 +139,14 @@ function main_net_vs()
 			Log:info("Also saving as current replay.")
 			write_replay_file()
 			character_select_mode = "2p_net_vs"
+			local keep_showing_the_damn_playfields = function ()
+				P1:render()
+				P2:render()
+			end
 			if currently_spectating then
-				return main_dumb_transition, {main_character_select, end_text, 45, 45}
+				return main_dumb_transition, {main_character_select, end_text, 45, 300, keep_showing_the_damn_playfields}
 			else
-				return main_dumb_transition, {main_character_select, end_text, 45, 180}
+				return main_dumb_transition, {main_character_select, end_text, 45, 300, keep_showing_the_damn_playfields}
 			end
 		end
 	end

@@ -179,7 +179,7 @@ function fullscreen()
 	return main_select_mode
 end
 
-function main_dumb_transition(next_func, text, timemin, timemax)
+function main_dumb_transition(next_func, text, timemin, timemax, gross_hack)
 	if P1 and P1.character then
 		stop_character_sounds(P1.character)
 	end
@@ -200,6 +200,9 @@ function main_dumb_transition(next_func, text, timemin, timemax)
 	local k = K[1]
 	while true do
 		-- end
+		if gross_hack then
+			gross_hack()
+		end
 		gprint(text, 300, 280)
 		coroutine.yield()
 		local ret = nil

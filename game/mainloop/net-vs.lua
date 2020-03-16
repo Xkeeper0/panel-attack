@@ -47,7 +47,7 @@ function main_net_vs()
 			P2:render()
 
 			-- Display buffer status for both players
-			--[[
+			-- --[[
 			gprint(string.len(P1.input_buffer), 340, 400)
 			gprint(string.len(P2.input_buffer), 340, 415)
 			grectangle("fill", 360, 400, string.len(P1.input_buffer) * 4, 8)

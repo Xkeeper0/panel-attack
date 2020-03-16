@@ -1,4 +1,6 @@
-local TCP_sock = nil
+
+-- this is a global. honkkkkkkkkkkkkk
+TCP_sock = nil
 local type_to_length = {G=1, H=1, N=1, E=4, P=121, O=121, I=2, Q=121, R=121, L=2, U=2}
 local leftovers = ""
 local wait = coroutine.yield

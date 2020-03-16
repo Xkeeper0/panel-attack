@@ -2234,6 +2234,8 @@ function Playfield:send_controls()
 		((keys[k.down] or this_frame_keys[k.down]) and 4 or 0) +
 		((keys[k.left] or this_frame_keys[k.left]) and 2 or 0) +
 		((keys[k.right] or this_frame_keys[k.right]) and 1 or 0)+1]
+
+	-- @TODO: This should absolutely be fixed to not be a global aaag
 	if TCP_sock then
 		net_send("I"..to_send)
 	end

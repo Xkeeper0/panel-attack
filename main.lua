@@ -29,6 +29,9 @@ local pointer_hidden = false
 function love.load()
 	math.randomseed(os.time())
 	for i=1,4 do math.random() end
+	main_font = love.graphics.newFont("assets/Nintendo-DS-BIOS.ttf", 16)
+	main_font:setLineHeight(1)
+
 	read_key_file()
 	mainloop = coroutine.create(fmainloop)
 end
@@ -78,11 +81,7 @@ function love.update(dt)
 end
 
 function love.draw()
-	-- if not main_font then
-		-- main_font = love.graphics.newFont("Oswald-Light.ttf", 15)
-	-- end
-	-- main_font:setLineHeight(0.66)
-	-- love.graphics.setFont(main_font)
+	love.graphics.setFont(main_font)
 	if love.graphics.getSupported("canvas") then
 		love.graphics.setBlendMode("alpha", "alphamultiply")
 		love.graphics.setCanvas(canvas)

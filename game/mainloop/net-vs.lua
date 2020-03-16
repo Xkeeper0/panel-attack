@@ -147,9 +147,9 @@ function main_net_vs()
 				P2:render()
 			end
 			if currently_spectating then
-				return main_dumb_transition, {main_character_select, end_text, 45, 300, keep_showing_the_damn_playfields}
+				return main_dumb_transition, {main_character_select, end_text, 45, 60, keep_showing_the_damn_playfields}
 			else
-				return main_dumb_transition, {main_character_select, end_text, 45, 300, keep_showing_the_damn_playfields}
+				return main_dumb_transition, {main_character_select, end_text, 45, 60, keep_showing_the_damn_playfields}
 			end
 		end
 	end

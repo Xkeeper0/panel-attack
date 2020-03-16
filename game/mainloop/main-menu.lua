@@ -20,21 +20,13 @@ do
 				{"1P vs yourself", main_local_vs_yourself_setup},
 				{"2P vs online at Jon's server", main_net_vs_setup, {"18.188.43.50"}},
 				{"2P vs local game", main_local_vs_setup},
-				{"Replay of 1P endless", main_replay_endless},
-				{"Replay of 1P puzzle", main_replay_puzzle},
-				{"Replay of 2P vs", main_replay_vs},
 				{"Configure input", main_config_input},
 				{"Set name", main_set_name},
 				{"Options", main_options},
 				{"Music test", main_music_test},
 				{"Replay Browser", main_replay_browser},
-		}
-		if love.graphics.getSupported("canvas") then
-			items[#items+1] = {"Fullscreen (LAlt+Enter)", fullscreen}
-		else
-			items[#items+1] = {"Your graphics card doesn't support canvases for fullscreen", main_select_mode}
-		end
-		items[#items+1] = {"Quit", os.exit}
+				{"Quit", os.exit}
+			}
 		local k = K[1]
 		while true do
 			local to_print = ""

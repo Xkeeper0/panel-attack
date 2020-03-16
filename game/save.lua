@@ -63,10 +63,19 @@ function read_replay_file() pcall(function()
 	local file = love.filesystem.newFile("replay.txt")
 	file:open("r")
 	local teh_json = file:read(file:getSize())
-	replay = json.decode(teh_json)
+	local temp = json.decode(teh_json)
+	if temp then
+		replay = temp
+	else
+		error("replay is bad")
+	end
 	if type(replay.in_buf) == "table" then
 		replay.in_buf=table.concat(replay.in_buf)
 		write_replay_file()
+	end
+
+	if replay == nil then
+		replay = {}
 	end
 end) end
 

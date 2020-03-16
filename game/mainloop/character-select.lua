@@ -317,7 +317,6 @@ function main_character_select()
 	-- why is that function called draw_button when it has so much fucking logic in it
 	-- what is going on. why would you do this. why. why. whyyyyyyy
 
-	-- what does LOC even MEAN
 	print("got to LOC before net_vs_room character select loop")
 	menu_clock = 0
 	while true do

@@ -1,7 +1,18 @@
+Gamestate = require "libs.hump.gamestate"
 Log	= require "game.log"
+
+
+gamestates = {
+	Start = require "game.gamestate.start",
+	Menu = require "game.gamestate.menu",
+	Legacy = require "game.gamestate.legacy",
+	Quit = require "game.gamestate.quit",
+}
+
 
 socket = require "socket"
 json = require "dkjson"
+
 require "libs.util"
 require "libs.class"
 require "libs.timezones"
@@ -19,93 +30,35 @@ require "game.sound"
 require "game.gen_panels"
 require "game.queue"
 
-local canvas = love.graphics.newCanvas(default_width, default_height)
+--local canvas = love.graphics.newCanvas(default_width, default_height)
 
-local last_x = 0
-local last_y = 0
-local input_delta = 0.0
-local pointer_hidden = false
+fonts = {}
+
 
 function love.load()
 	math.randomseed(os.time())
 	for i=1,4 do math.random() end
-	main_font = love.graphics.newFont("assets/Nintendo-DS-BIOS.ttf", 16)
-	main_font:setLineHeight(1)
 
-	read_key_file()
-	mainloop = coroutine.create(fmainloop)
+	fonts	= {
+		big		= love.graphics.newFont("assets/Nintendo-DS-BIOS.ttf", 32),
+		main	= love.graphics.newFont("assets/Nintendo-DS-BIOS.ttf", 16),
+	}
+
+	main_font = fonts.main
+
+	Gamestate.switch(gamestates.Start)
+	Gamestate.registerEvents()
+
+	screenMode	= {}
+	screenMode.width, screenMode.height, screenMode.flags	= love.window.getMode()
 end
 
 function love.update(dt)
-	if love.mouse.getX() == last_x and love.mouse.getY() == last_y then
-		if not pointer_hidden then
-			if input_delta > mouse_pointer_timeout then
-				pointer_hidden = true
-				love.mouse.setVisible(false)
-			else
-			 input_delta = input_delta + dt
-			end
-		end
-	else
-		last_x = love.mouse.getX()
-		last_y = love.mouse.getY()
-		input_delta = 0.0
-		if pointer_hidden then
-			pointer_hidden = false
-			love.mouse.setVisible(true)
-		end
-	end
 
-
-	leftover_time = leftover_time + dt
-
-	local status, err = coroutine.resume(mainloop)
-	if not status then
-		error(err..'\n'..debug.traceback(mainloop))
-	end
-	this_frame_messages = {}
-
-	--Play music here
-	for k, v in pairs(music_t) do
-		if v and k - love.timer.getTime() < 0.007 then
-			v.t:stop()
-			v.t:play()
-			currently_playing_tracks[#currently_playing_tracks+1]=v.t
-			-- Manual looping code
-			--if v.l then
-				--music_t[love.timer.getTime() + v.t:getDuration()] = make_music_t(v.t, true)
-			--end
-			music_t[k] = nil
-		end
-	end
 end
 
 function love.draw()
-	love.graphics.setFont(main_font)
-	if love.graphics.getSupported("canvas") then
-		love.graphics.setBlendMode("alpha", "alphamultiply")
-		love.graphics.setCanvas(canvas)
-		love.graphics.setBackgroundColor(0.1, 0.1, 0.1)
-		love.graphics.clear()
-	else
-		love.graphics.setColor(0.1, 0.1, 0.1)
-		love.graphics.rectangle("fill",-5,-5,900,900)
-		love.graphics.setColor(1, 1, 1)
-	end
-	for i=gfx_q.first,gfx_q.last do
-		gfx_q[i][1](unpack(gfx_q[i][2]))
-	end
-	gfx_q:clear()
-	if love.timer.getFPS() < 59 then
-		love.graphics.print(love.timer.getFPS() .. " FPS",385,580) -- TODO: Make this a toggle
-	end
-	love.graphics.print(string.format("%d K", collectgarbage("count")), 380, 595)
-
-	if love.graphics.getSupported("canvas") then
-		love.graphics.setCanvas()
-		love.graphics.clear(love.graphics.getBackgroundColor())
-		x, y, w, h = scale_letterbox(love.graphics.getWidth(), love.graphics.getHeight(), 4, 3)
-		love.graphics.setBlendMode("alpha","premultiplied")
-		love.graphics.draw(canvas, x, y, 0, w / default_width, h / default_height)
-	end
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.print(love.timer.getFPS() .. " FPS",10,40) -- TODO: Make this a toggle
+	love.graphics.print(string.format("%d K", collectgarbage("count")), 10, 15)
 end

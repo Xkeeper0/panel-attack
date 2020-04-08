@@ -29,11 +29,13 @@ function fmainloop()
 	gprint("Reading config file", 300, 280)
 	coroutine.yield()
 	read_conf_file() -- TODO: stop making new config files
+	--[[
 	local x,y, display = love.window.getPosition()
 	love.window.setPosition(
 		config.window_x or x,
 		config.window_y or y,
 		config.display or display)
+	--]]
 	--gprint("Copying Puzzles Readme")
 	--coroutine.yield()
 	--copy_file("Custom Puzzles Readme.txt", "puzzles/README.txt")
